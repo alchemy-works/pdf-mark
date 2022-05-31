@@ -6,6 +6,8 @@ const ClassName = css`
   box-sizing: border-box;
   height: 100vh;
   padding: 1rem;
+  margin: 0 auto;
+  max-width: 1000px;
 
   .select-block {
     box-sizing: border-box;
@@ -40,26 +42,42 @@ const ClassName = css`
     font-size: 1rem;
     width: 4rem;
   }
+
+  .none-border {
+    border: none;
+  }
+
+  .none-padding {
+    padding: 0;
+  }
 `
 
 export default function App(props) {
 
     const [processing, setProcessing] = useState(false)
+    const [processingFileNo, setProcessingFileNo] = useState(0)
 
     async function onSubmit(ev) {
         ev.preventDefault()
         try {
             setProcessing(true)
             const form = new FormData(ev.target)
-            const template = form.get('template')
-            const targetList = form.getAll('targets')
-            const index = form.getAll('index')
-            const pageIndex = Math.trunc(Number(index)) + -1
-            await mergePdf(template, targetList, pageIndex >= 0 ? pageIndex : 0)
+            const index = form.get('index')
+            const pageIndex = Math.trunc(Number(index)) - 1
+            await mergePdf({
+                templateFile: form.get('template'),
+                targetFileList: form.getAll('targets'),
+                pageIndex: pageIndex >= 0 ? pageIndex : 0,
+                prefix: form.get('prefix'),
+                progressCallback: (no) => {
+                    setProcessingFileNo(no)
+                },
+            })
         } catch (err) {
             alert(err.message)
         } finally {
             setProcessing(false)
+            setProcessingFileNo(0)
         }
     }
 
@@ -77,13 +95,25 @@ export default function App(props) {
                 <input id="targets" name="targets" type="file" multiple accept=".pdf" required/>
             </div>
             <div className="select-block none-border-top">
-                <label>
-                    添加位置&nbsp;&nbsp;
-                    <input type="number" name="index" defaultValue={1}/>
-                </label>
-                <button disabled={processing} type="submit">
-                    {processing ? '正在处理...' : '开始处理'}
-                </button>
+                <span className="select-block none-border none-padding">
+                    <label>
+                        添加位置&nbsp;&nbsp;
+                        <input type="number" name="index" defaultValue={1}/>
+                    </label>
+                    <label>
+                        文件名称前缀&nbsp;&nbsp;
+                        <input type="text" name="prefix" defaultValue="Mark-" required/>
+                    </label>
+                </span>
+                {processing ? (
+                    <button disabled type="submit">
+                        正在处理{processingFileNo ? `第${processingFileNo}个文件...` : '...'}
+                    </button>
+                ) : (
+                    <button type="submit">
+                        开始处理
+                    </button>
+                )}
             </div>
         </form>
     )
