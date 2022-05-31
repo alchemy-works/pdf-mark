@@ -10,6 +10,6 @@ export default async function mergePdf(templateFile, targetFileList, pageIndex =
         const [templatePage] = await targetDoc.copyPages(templateDoc, [0])
         targetDoc.insertPage(pageIndex, templatePage)
         const bytes = await targetDoc.save()
-        saveAs(new Blob([bytes], { type: 'application/octet-stream' }), filename)
+        saveAs(new Blob([bytes], { type: 'application/octet-stream' }), `mark-${filename}`)
     }
 }
