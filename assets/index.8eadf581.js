@@ -99,6 +99,8 @@ end`},Av=function(){for(var e=[],t=0;t<arguments.length;t++)e[t]=arguments[t];re
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
   }
 
   .none-border-top {
